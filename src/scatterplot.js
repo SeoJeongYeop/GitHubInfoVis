@@ -36,6 +36,9 @@ class Scatterplot {
         this.brushCircles(event);
       })
   }
+  setData(updateData) {
+    this.data = updateData;
+  }
 
   update(xVar, yVar, username) {
     this.xVar = xVar;
@@ -47,7 +50,6 @@ class Scatterplot {
     this.zScale.domain([...new Set(this.data.map(d => d.username === this.username))])
 
     this.container.call(this.brush);
-    console.log("this.data", this.data);
     this.circles = this.container.selectAll("circle")
       .data(this.data)
       .join("circle")
