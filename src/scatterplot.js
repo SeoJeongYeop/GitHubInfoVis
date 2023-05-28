@@ -43,8 +43,7 @@ class Scatterplot {
   update(xVar, yVar, username) {
     this.xVar = xVar;
     this.yVar = yVar;
-    this.username = username
-
+    this.username = username;
     this.xScale.domain(d3.extent(this.data, d => d[xVar])).range([0, this.width]);
     this.yScale.domain(d3.extent(this.data, d => d[yVar])).range([this.height, 0]);
     this.zScale.domain([...new Set(this.data.map(d => d.username === this.username))])
@@ -85,12 +84,12 @@ class Scatterplot {
     this.xAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
       .transition()
-      .call(d3.axisBottom(this.xScale));
+      .call(d3.axisBottom(this.xScale).tickFormat(d3.format(".2s")));
 
     this.yAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
       .transition()
-      .call(d3.axisLeft(this.yScale));
+      .call(d3.axisLeft(this.yScale).tickFormat(d3.format(".2s")));
   }
 
   isBrushed(d, selection) {
