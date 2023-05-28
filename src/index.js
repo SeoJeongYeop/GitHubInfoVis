@@ -1,5 +1,5 @@
 let totalData, data, sliderData, brushedData, lineChart, pieChart, repoCard, repoBarChart, scatterPlot, scatterPlotDetail, boxPlot;
-let selectUsername;
+let selectUsername, startDate;
 
 function updateYearData(val) {
   console.log("updateYearData", val);
@@ -62,12 +62,13 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     selectUsername = "zypnwnqd";
 
     // 보조도구 설정
+    setYearDropdown(yearRange.reverse());
+    setUserSelect(usernameRange);
     setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
+    startDate = dateRange[0];
     let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
     console.log("intvDate", intvDate);
 
-    setYearDropdown(yearRange.reverse());
-    setUserSelect(usernameRange);
     setDateRangeSlider(intvDate);
 
     let scatterData = getScatterPlotData();
@@ -129,9 +130,21 @@ function setYear(val) {
     updateYearData(val);
   }
 }
+
+function getDayToDate(day) {
+  let startDateStamp = new Date(startDate);
+  let target = new Date(startDateStamp.getTime() + day * 24 * 60 * 60 * 1000);
+  let yyyy = target.getFullYear();
+  let mm = String(target.getMonth() + 1).padStart(2, '0');
+  let dd = String(target.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 function setDateRangeSlider(intvDate) {
   // source: mdaquibanwer/price-range-slider-with-min-max-input-price
   const rangeInputs = document.querySelectorAll(".range-input input");
+  const dateStartInput = document.getElementById("input-start");
+  const dateEndInput = document.getElementById("input-end");
+
   rangeInputs[0].min = 0;
   rangeInputs[0].max = intvDate;
   rangeInputs[0].value = 0;
@@ -144,21 +157,58 @@ function setDateRangeSlider(intvDate) {
     range.addEventListener("input", (e) => {
       let start = parseInt(rangeInputs[0].value);
       let end = parseInt(rangeInputs[1].value);
-      console.log("start", start, "end", end);
 
       let leftPercent = (start / rangeInputs[0].max) * 100;
       let rightPercent = (end / rangeInputs[1].max) * 100;
 
       if (end - start < 1) {
-        if (e.target.className === "range-start")
+        if (e.target.className === "range-start") {
           rangeInputs[0].value = end - 1;
-        else if (e.target.className === "range-end")
+          dateStartInput.value = getDayToDate(end - 1);
+        }
+        else if (e.target.className === "range-end") {
           rangeInputs[1].value = start + 1;
+          dateEndInput.value = getDayToDate(start + 1);
+        }
       } else {
+        dateStartInput.value = getDayToDate(start);
+        dateEndInput.value = getDayToDate(end);
+
         progress.style.left = leftPercent + "%";
         progress.style.right = (100 - rightPercent) + "%";
       }
     })
+  });
+  [dateStartInput, dateEndInput].forEach(dateInput => {
+    dateInput.addEventListener("input", (e) => {
+      let start = getDateDiff(startDate, dateStartInput.value);
+      let end = getDateDiff(startDate, dateEndInput.value);
+      let leftPercent = (start / rangeInputs[0].max) * 100;
+      let rightPercent = (end / rangeInputs[1].max) * 100;
+      if (start < 0) {
+        rangeInputs[0].value = rangeInputs[0].min;
+        progress.style.left = rangeInputs[0].min / rangeInputs[0].max + "%";
+      }
+      else if (end > rangeInputs[1].max) {
+        rangeInputs[1].value = rangeInputs[1].max;
+        progress.style.right = rangeInputs[1].max / rangeInputs[1].max + "%";
+      }
+      else if (end - start < 1) {
+        if (e.target.id === "input-start") {
+          rangeInputs[0].value = end - 1;
+          progress.style.left = ((end - 1) / rangeInputs[0].max) * 100 + "%";
+        }
+        else if (e.target.id === "input-end") {
+          rangeInputs[1].value = start + 1;
+          progress.style.right = (100 - ((start + 1) / rangeInputs[1].max) * 100) + "%";
+        }
+      } else {
+        rangeInputs[0].value = start;
+        rangeInputs[1].value = end;
+        progress.style.left = leftPercent + "%";
+        progress.style.right = (100 - rightPercent) + "%";
+      }
+    });
   })
 }
 
