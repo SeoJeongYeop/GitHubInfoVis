@@ -5,20 +5,31 @@ function updateYearData(val) {
   console.log("updateYearData", val);
   console.log("data before", data.length);
 
-  if (val === "ALL") {
+  if (val === "ALL")
     data = totalData;
-  }
-  else {
-    data = totalData.filter(d => {
-      return formatYear(d.date) === String(val);
-    });
-  }
+  else
+    data = totalData.filter(d => formatYear(d.date) === String(val));
   console.log("data", data.length);
-
   updateVisData();
 }
 
+function getUserPeriodData() {
+  data = JSON.parse(JSON.stringify(totalData));
+  let start = document.getElementById("input-start").value;
+  let end = document.getElementById("input-end").value;
+  let userData = data.filter(obj => {
+    return (obj.username === selectUsername
+      && obj.date >= start
+      && obj.date <= end)
+  });
+  return userData;
+}
+/**
+ * 연도 변경시 모든 데이터 범위를 조정하고 차트 업데이트
+ */
 function updateVisData() {
+  userData = getUserPeriodData();
+  lineChart.setData(userData);
   updateLineChart();
   let scatterData = getScatterPlotData();
   console.log("userSumData", scatterData["userSumData"].length);
@@ -29,10 +40,16 @@ function updateVisData() {
 
   updateScatterPlot();
 }
+/**
+ * 라인차트 업데이트
+ */
 function updateLineChart() {
   console.log("[update] LineChart");
+  lineChart.update("date", "commit_count", selectUsername);
 }
-
+/**
+ * 산점도 업데이트
+ */
 function updateScatterPlot() {
   console.log("[update] ScatterPlot");
   let xVar = d3.select("input[type=radio][name=x-encoding]:checked").property("value");
@@ -53,9 +70,8 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
       d["pr_count"] = parseInt(d["pr_count"]);
       d["issue_count"] = parseInt(d["issue_count"]);
     });
-    totalData = csvData;
+    totalData = JSON.parse(JSON.stringify(csvData));
     data = csvData;
-    let dateRange = [...new Set(data.map(d => d.date))].sort();
     let yearRange = [...new Set(data.map(d => formatYear(d.date)))].sort();
     let usernameRange = [...new Set(data.map(d => d.username))].sort();
 
@@ -64,6 +80,9 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     // 보조도구 설정
     setYearDropdown(yearRange.reverse());
     setUserSelect(usernameRange);
+    let userData = data.filter(obj => obj.username === selectUsername);
+    console.log("userData", userData.length);
+    let dateRange = [...new Set(userData.map(d => d.date))].sort();
     setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
     startDate = dateRange[0];
     let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
@@ -71,9 +90,13 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
 
     setDateRangeSlider(intvDate);
 
-    let scatterData = getScatterPlotData();
-
     // d3 visualization
+    // 1. Line Chart
+    lineChart = new Linechart("#line-chart", userData);
+    lineChart.initialize();
+    updateLineChart();
+    // 3. Scatter plot
+    let scatterData = getScatterPlotData();
     scatterPlot = new Scatterplot("#scatterplot", "#sc-tooltip", scatterData["userSumData"]);
     scatterPlotDetail = new Scatterplot("#scatterplot-detail", "#sc-tooltip", scatterData["innerRangeData"]);
     scatterPlot.initialize();
@@ -82,7 +105,7 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     d3.selectAll("input[type=radio][name=x-encoding]").on("change", updateScatterPlot);
     d3.selectAll("input[type=radio][name=y-encoding]").on("change", updateScatterPlot);
     d3.selectAll("#use-color").on("change", updateScatterPlot);
-    //TODO slider chaining
+    d3.selectAll(".range-input input").on("change", updateVisData);
   });
 
 function setDateInputs(minDate, maxDate) {
@@ -258,23 +281,28 @@ function calculateQuartiles(data, key) {
 }
 
 function getScatterPlotData() {
+  let start = document.getElementById("input-start").value;
+  let end = document.getElementById("input-end").value;
   const userSumObj = {};
+  data = JSON.parse(JSON.stringify(totalData));
   data.forEach((d) => {
-    if (!userSumObj[d.username]) {
-      userSumObj[d.username] = {
-        username: d.username,
-        commit_count: 0,
-        issue_count: 0,
-        pr_count: 0,
-        total_additions: 0,
-        total_deletions: 0,
-      };
+    if (start < d.date && d.date < end) {
+      if (!userSumObj[d.username]) {
+        userSumObj[d.username] = {
+          username: d.username,
+          commit_count: 0,
+          issue_count: 0,
+          pr_count: 0,
+          total_additions: 0,
+          total_deletions: 0,
+        };
+      }
+      userSumObj[d.username].commit_count += d.commit_count;
+      userSumObj[d.username].issue_count += d.issue_count;
+      userSumObj[d.username].pr_count += d.pr_count;
+      userSumObj[d.username].total_additions += d.total_additions;
+      userSumObj[d.username].total_deletions += d.total_deletions;
     }
-    userSumObj[d.username].commit_count += d.commit_count;
-    userSumObj[d.username].issue_count += d.issue_count;
-    userSumObj[d.username].pr_count += d.pr_count;
-    userSumObj[d.username].total_additions += d.total_additions;
-    userSumObj[d.username].total_deletions += d.total_deletions;
   });
   const MUL = 1.5;
   const userSumData = [...Object.values(userSumObj)];
