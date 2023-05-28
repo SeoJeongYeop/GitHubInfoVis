@@ -6,13 +6,55 @@ function updateYearData(val) {
   console.log("data before", data.length);
 
   if (val === "ALL")
-    data = totalData;
-  else
-    data = totalData.filter(d => formatYear(d.date) === String(val));
-  console.log("data", data.length);
+    data = JSON.parse(JSON.stringify(totalData));
+  else {
+    data = JSON.parse(JSON.stringify(totalData));
+    console.log("else", data[0].date, typeof (data[0].date));
+    data = data.filter(d => formatYear(d.date) === String(val));
+  }
+  if (data.length === 0) {
+    alert("해당 연도에는 데이터가 없습니다.");
+    return;
+  }
+  console.log("data", data.length, "val", val);
+  let userData = data.filter(obj => obj.username === selectUsername);
+  let dateRange = [...new Set(userData.map(d => d.date))].sort();
+  setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
+  startDate = dateRange[0];
+  let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
+  console.log("intvDate", intvDate);
+  const progress = document.getElementsByClassName("progress")[0];
+  progress.style.left = "0%";
+  progress.style.right = "0%";
+  setDateRangeSlider(intvDate);
+
   updateVisData();
 }
-
+function fillZeroUserPeriodData(start, end, userData) {
+  userData.sort((a, b) => a.date - b.date);
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const currentDate = new Date(startDate);
+  let offset = 0;
+  let cnt = 0;
+  while (currentDate <= endDate) {
+    cnt += 1;
+    let cur = currentDate.toISOString().split('T')[0];
+    if (cur === userData[offset].date) {
+      currentDate.setDate(currentDate.getDate() + 15);
+      offset += 1;
+    }
+    else {
+      let temp = JSON.parse(JSON.stringify(userData[offset]));
+      temp.repo_name = "", temp.date = cur;
+      temp.commit_count = 0, temp.issue_count = 0, temp.pr_count = 0, temp.total_additions = 0, temp.total_deletions = 0;
+      userData.push(temp);
+      currentDate.setDate(currentDate.getDate() + 15);
+    }
+  }
+  console.log("fillZeroUserPeriodData", cnt, userData.length);
+  return userData;
+}
 function getUserPeriodData() {
   data = JSON.parse(JSON.stringify(totalData));
   let start = document.getElementById("input-start").value;
@@ -22,6 +64,11 @@ function getUserPeriodData() {
       && obj.date >= start
       && obj.date <= end)
   });
+  if (userData.length === 0) {
+    alert("해당 연도에 유저의 기여내역이 없습니다.");
+    return;
+  }
+  userData = fillZeroUserPeriodData(start, end, userData)
   return userData;
 }
 /**
@@ -87,6 +134,7 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     startDate = dateRange[0];
     let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
     console.log("intvDate", intvDate);
+
 
     setDateRangeSlider(intvDate);
 

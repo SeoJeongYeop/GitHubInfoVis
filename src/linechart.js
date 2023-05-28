@@ -44,12 +44,14 @@ class Linechart {
     // X축 생성
     this.xAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+      .attr("font-size", "0.5rem")
       .transition()
       .call(d3.axisBottom(this.xScale));
 
     // Y축 생성
     this.yAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
+      .attr("font-size", "0.5rem")
       .transition()
       .call(d3.axisLeft(this.yScale).tickFormat(d3.format(".2s")));
 
