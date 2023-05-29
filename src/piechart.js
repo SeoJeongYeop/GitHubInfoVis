@@ -23,13 +23,15 @@ class Piechart {
     }
   }
 
-  constructor(svg, data, width = 150, height = 150) {
+  constructor(svg, tooltip, data, width = 150, height = 150) {
     this.svg = svg;
+    this.tooltip = tooltip;
     this.data = data;
     this.width = width;
     this.height = height;
     this.radius = width / 2;
     this.preprocess();
+    this.handlers = {};
   }
 
   setData(data) {
@@ -40,6 +42,7 @@ class Piechart {
   initialize() {
     this.svg = d3.select(this.svg);
     this.container = this.svg.append('g');
+    this.tooltip = d3.select(this.tooltip);
     this.legend = this.svg.append('g');
     this.zScale = d3.scaleOrdinal().range(d3.schemeCategory10);
     this.svg
@@ -58,10 +61,30 @@ class Piechart {
       .innerRadius(0)
       .outerRadius(this.radius);
     this.pieData = this.pie(this.data);
+    console.log(this.pieData)
 
     this.container.selectAll("path")
       .data(this.pieData)
       .join("path")
+      .on("mouseover", (e, d) => {
+        this.tooltip.select(".tooltip-inner")
+          .html(`${d.data[category]}: ${d.data[value]}`);
+        Popper.createPopper(e.target, this.tooltip.node(), {
+          placement: 'top',
+          modifiers: [
+            {
+              name: 'arrow',
+              options: {
+                element: this.tooltip.select(".tooltip-arrow").node(),
+              },
+            },
+          ],
+        });
+        this.tooltip.style("display", "block");
+      })
+      .on("mouseout", (d) => {
+        this.tooltip.style("display", "none");
+      })
       .transition()
       .attr("d", this.arc)
       .attr("fill", d => this.zScale(d.data[category]));
@@ -72,5 +95,13 @@ class Piechart {
       .style("font-size", ".6rem")
       .attr("transform", `translate(${this.width + this.margin.left + 10}, ${this.height / 3})`)
       .call(d3.legendColor().scale(this.zScale));
+  }
+
+  on(eventType, handler) {
+    this.handlers[eventType] = handler;
+  }
+
+  handleMouseOver(e, d, category, value) {
+
   }
 }

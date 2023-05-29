@@ -217,7 +217,7 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     lineChart.initialize();
     updateLineChart();
     // 2. Repo Chart
-    pieChart = new Piechart("#pie-chart", repoData);
+    pieChart = new Piechart("#pie-chart", "#pie-tooltip", repoData);
     pieChart.initialize();
     updatePieChart();
     // 3. Scatter plot
