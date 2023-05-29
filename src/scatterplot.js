@@ -113,4 +113,8 @@ class Scatterplot {
   on(eventType, handler) {
     this.handlers[eventType] = handler;
   }
+
+  removeSelection() {
+    d3.selectAll("rect.selection").remove();
+  }
 }

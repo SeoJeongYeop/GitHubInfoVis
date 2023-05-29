@@ -158,26 +158,29 @@ function updateVisData() {
   scatterPlot.setData(scatterData["userSumData"]);
   scatterPlotDetail.setData(scatterData["innerRangeData"]);
   updateScatterPlot();
+  // 4. boxplot
+  let keys = ["commit_count", "pr_count", "issue_count", "total_additions", "total_deletions"];
+  keys.forEach((key, i) => {
+    boxPlots[i].setData(scatterData["userSumData"]);
+    updateBoxPlot(boxPlots[i], key);
+  });
 }
 /**
  * 라인차트 업데이트
  */
 function updateLineChart() {
-  console.log("[update] LineChart");
   lineChart.update("date", ["commit_count", "issue_count", "pr_count"], selectUsername);
 }
 /**
  * 파이차트 업데이트
  */
 function updatePieChart() {
-  console.log("[update] PieChart");
   pieChart.update("repo", "contr", selectUsername);
 }
 /**
  * Repo bar 차트 업데이트
  */
 function updateBarChart(chart, repoObj) {
-  console.log("[update] RepoBarChart");
   if (repoObj === null)
     chart.delete();
   else
@@ -187,7 +190,6 @@ function updateBarChart(chart, repoObj) {
  * 산점도 업데이트
  */
 function updateScatterPlot() {
-  console.log("[update] ScatterPlot");
   let xVar = d3.select("input[type=radio][name=x-encoding]:checked").property("value");
   let yVar = d3.select("input[type=radio][name=y-encoding]:checked").property("value");
   scatterPlot.update(xVar, yVar, selectUsername);
@@ -197,7 +199,6 @@ function updateScatterPlot() {
  * 박스플롯 업데이트
  */
 function updateBoxPlot(chart, key) {
-  console.log("[update] BoxPlot");
   chart.update(key, selectUsername);
 }
 
@@ -224,12 +225,10 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     setYearDropdown(yearRange.reverse());
     setUserSelect(usernameRange);
     let userData = data.filter(obj => obj.username === selectUsername);
-    console.log("userData", userData.length);
     let dateRange = [...new Set(userData.map(d => d.date))].sort();
     setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
     startDate = dateRange[0];
     let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
-    console.log("intvDate", intvDate, userData[0]);
     let repoData = getUserRepoSum(userData);
     userData = getUserDateSum(userData);
     userData = fillZeroUserPeriodData(dateRange[0], dateRange[dateRange.length - 1], userData)
@@ -264,6 +263,30 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     d3.selectAll("input[type=radio][name=y-encoding]").on("change", updateScatterPlot);
     d3.selectAll("#use-color").on("change", updateScatterPlot);
     d3.selectAll(".range-input input").on("change", updateVisData);
+
+    scatterPlot.on("brush", (brushedItems) => {
+      if (brushedItems.length !== 0)
+        brushedData = brushedItems;
+      else
+        brushedData = scatterData["userSumData"];
+      let keys = ["commit_count", "pr_count", "issue_count", "total_additions", "total_deletions"];
+      keys.forEach((key, i) => {
+        boxPlots[i].setData(brushedData);
+        updateBoxPlot(boxPlots[i], key);
+      });
+    });
+
+    scatterPlotDetail.on("brush", (brushedItems) => {
+      if (brushedItems.length !== 0)
+        brushedData = brushedItems;
+      else
+        brushedData = scatterData["userSumData"];
+      let keys = ["commit_count", "pr_count", "issue_count", "total_additions", "total_deletions"];
+      keys.forEach((key, i) => {
+        boxPlots[i].setData(brushedData);
+        updateBoxPlot(boxPlots[i], key);
+      });
+    });
 
     //4. Box plot
     boxPlots = []

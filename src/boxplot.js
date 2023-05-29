@@ -33,10 +33,8 @@ class Boxplot {
   }
 
   update(category, username) {
-    console.log("update box");
     this.username = username;
     this.userPos = this.data.find(d => d.username === username);
-    console.log("user", this.username, this.userPos)
     this.xScale
       .domain([0, d3.max(this.data.map(d => d[category]))])
       .range([0, this.width]);
@@ -46,9 +44,10 @@ class Boxplot {
       .range([this.height, 0]);
 
     this.box = this.calculateQuartiles(this.data, category);
-
-    console.log("render rect", this.box);
+    // 지우고 다시그리기
     this.container.selectAll("rect").remove();
+    this.container.selectAll("text").remove();
+
     this.container.append("rect")
       .data([this.box])
       .join("rect")
@@ -178,17 +177,9 @@ class Boxplot {
     let rangeMin = q1 - MUL * iqr;
     let boxMin = sortedData.find(d => rangeMin <= d)
     let rangeMax = q3 + MUL * iqr;
-    let boxMax = sortedData.reverse().find(d => {
-      // console.log("boxmax", d)
-      return rangeMax >= d;
-    });
+    let boxMax = sortedData.reverse().find(d => rangeMax >= d);
 
-    let outliers = sortedData.filter(d => {
-
-      // console.log(d, boxMax, boxMin, (d > boxMax || d < boxMin));
-      return (d > boxMax || d < boxMin);
-    })
-    console.log("outliers", outliers)
+    let outliers = sortedData.filter(d => d > boxMax || d < boxMin);
     return { q1, q3, iqr, boxMax, boxMin, median, outliers };
   }
 }
