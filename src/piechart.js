@@ -91,7 +91,7 @@ class Piechart {
     // legend 추가
     this.legend
       .style("display", "inline")
-      .style("font-size", ".6rem")
+      .style("font-size", ".7rem")
       .attr("transform", `translate(${this.width + this.margin.left + 10}, ${this.height / 3})`)
       .call(d3.legendColor().scale(this.zScale));
   }

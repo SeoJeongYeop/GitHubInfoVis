@@ -1,10 +1,10 @@
 class Linechart {
   margin = {
-    top: 40, right: 120, bottom: 40, left: 40
+    top: 100, right: 40, bottom: 20, left: 40
   }
   parseTime = d3.timeParse("%Y-%m-%d");
 
-  constructor(svg, data, width = 420, height = 300) {
+  constructor(svg, data, width = 440, height = 400) {
     this.svg = svg;
     this.data = data;
     this.width = width;
@@ -62,14 +62,14 @@ class Linechart {
     // X축 생성
     this.xAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
-      .attr("font-size", "0.5rem")
+      .style("font-size", "0.7rem")
       .transition()
       .call(d3.axisBottom(this.xScale));
 
     // Y축 생성
     this.yAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
-      .attr("font-size", "0.5rem")
+      .style("font-size", "0.8rem")
       .transition()
       .call(d3.axisLeft(this.yScale).tickFormat(d3.format(".2s")));
 
@@ -91,8 +91,8 @@ class Linechart {
     // legend 추가
     this.legend
       .style("display", "inline")
-      .style("font-size", ".6em")
-      .attr("transform", `translate(${this.width + this.margin.left + 10}, ${this.height / 4})`)
+      .style("font-size", ".7rem")
+      .attr("transform", `translate(${this.margin.left + 10}, ${10})`)
       .call(d3.legendColor().scale(this.zScale));
   }
 }

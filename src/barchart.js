@@ -3,7 +3,7 @@ class RepoBarchart {
     top: 10, right: 10, bottom: 20, left: 40
   }
 
-  constructor(svg, width = 250, height = 120) {
+  constructor(svg, width = 260, height = 120) {
     this.svg = svg;
     this.width = width;
     this.height = height;
@@ -50,7 +50,8 @@ class RepoBarchart {
 
     this.yAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
-      .call(d3.axisLeft(this.yScale));
+      .style("font-size", "0.7rem")
+      .call(d3.axisLeft(this.yScale).tickFormat(d3.format(".2s")));
   }
 
   delete() {

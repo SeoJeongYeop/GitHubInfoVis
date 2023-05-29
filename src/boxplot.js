@@ -1,9 +1,9 @@
 class Boxplot {
   margin = {
-    top: 10, right: 40, bottom: 10, left: 40
+    top: 10, right: 40, bottom: 20, left: 40
   }
 
-  constructor(svg, data, width = 400, height = 100) {
+  constructor(svg, data, width = 450, height = 150) {
     this.svg = svg;
     this.data = data;
     this.width = width;
@@ -65,7 +65,7 @@ class Boxplot {
       .join("text")
       .attr("transform", dim => `translate(${this.width / 2 - category.length * 7 / 2}, 0)`)
       .text(category)
-      .attr("font-size", ".9rem")
+      .style("font-size", "1rem")
     // Boxplot horizontal line
     this.container.append("rect")
       .data([this.box])

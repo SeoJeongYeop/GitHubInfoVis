@@ -1,9 +1,9 @@
 class Scatterplot {
   margin = {
-    top: 10, right: 100, bottom: 40, left: 40
+    top: 10, right: 10, bottom: 30, left: 30
   }
 
-  constructor(svg, tooltip, data, width = 300, height = 300) {
+  constructor(svg, tooltip, data, width = 360, height = 360) {
     this.svg = svg;
     this.tooltip = tooltip;
     this.data = data;
@@ -54,7 +54,9 @@ class Scatterplot {
       .join("circle")
       .on("mouseover", (e, d) => {
         this.tooltip.select(".tooltip-inner")
-          .html(`${this.xVar}: ${d[this.xVar]}<br />${this.yVar}: ${d[this.yVar]}`);
+          .html(`${d.username}
+          <br />${this.xVar}: ${d[this.xVar]}
+          <br />${this.yVar}: ${d[this.yVar]}`);
 
         Popper.createPopper(e.target, this.tooltip.node(), {
           placement: 'top',
@@ -67,7 +69,6 @@ class Scatterplot {
             },
           ],
         });
-
         this.tooltip.style("display", "block");
       })
       .on("mouseout", (d) => {
@@ -80,6 +81,7 @@ class Scatterplot {
       .attr("cy", d => this.yScale(d[yVar]))
       .attr("fill", this.zScale(d => d.username === this.username))
       .attr("r", 3)
+      .attr("opacity", 0.5)
 
     this.xAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)

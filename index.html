@@ -37,7 +37,7 @@
     <body>
         <div class="container">
             <h1>GitHub Activity Visualization</h1>
-            <div class="row d-flex flex-row">
+            <div class="row d-flex flex-row my-5">
                 <div class="col-2 dropdown">
                     <button id="btn-drop-year" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     ALL</button>
@@ -50,11 +50,12 @@
                     </select>
                 </div>
             </div>
-            <div class="row mb-3">
-                <div class="col-6 text-center">
+            <div class="row mb-3" style="height:700px;">
+                <div class="col-6 text-center py-3">
+                    <h5>기간별 기여내역 추이</h5>
                     <svg width="400" height="400" id="line-chart">
                     </svg>
-                    <div class="wrapper mb-4">
+                    <div class="wrapper my-5">
                         <div class="slider">
                             <div class="progress"></div>
                         </div>
@@ -74,7 +75,51 @@
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex flex-row mt-5 mb-2">
+                </div>
+                <div class="col-6 text-center">
+                    <h5>기간내 Repository별 기여내역</h5>
+                    <svg width="400" height="400" id="pie-chart">
+                    </svg>
+                    <div class="tooltip bs-tooltip-top show" id="pie-tooltip" role="tooltip" style="display:none">
+                        <div class="tooltip-arrow"></div>
+                        <div class="tooltip-inner">
+                            stat
+                        </div>
+                    </div>
+                    <h5>기간내 상위 기여 Repository</h5>
+                    <div id="repo-stat" class="text-center">
+                        <div id="repo-info-1" class="d-flex flex-row justify-content-between">
+                            <span>1</span>
+                            <div class="me-2"></div>
+                            <svg></svg>
+                        </div>
+                        <div id="repo-info-2" class="d-flex flex-row justify-content-between">
+                            <span>2</span>
+                            <div class="me-2"></div>
+                            <svg></svg>
+                        </div>
+                        <div id="repo-info-3" class="d-flex flex-row justify-content-between">
+                            <span>3</span>
+                            <div class="me-2"></div>
+                            <svg></svg>
+                        </div>
+                        <div id="repo-info-4" class="d-flex flex-row justify-content-between">
+                            <span>4</span>
+                            <div class="me-2"></div>
+                            <svg></svg>
+                        </div>
+                        <div id="repo-info-5" class="d-flex flex-row justify-content-between">
+                            <span>5</span>
+                            <div class="me-2"></div>
+                            <svg></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row my-5">
+                <div class="d-flex flex-column align-items-center col-6">
+                    <h5>유저 기여 분포</h5>
+                    <div class="d-flex flex-row">
                         <span class="mx-4">X:</span>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="x-encoding" value="commit_count" id="x-commits" checked>
@@ -97,7 +142,7 @@
                             <label class="form-check-label" for="x-deletions">Deletions</label>
                         </div>
                     </div>
-                    <div class="d-flex flex-row">
+                    <div class="d-flex flex-row mb-4">
                         <span class="mx-4">Y:</span>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="y-encoding" value="commit_count" id="y-commits">
@@ -120,54 +165,21 @@
                             <label class="form-check-label" for="y-deletions">Deletions</label>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <svg width="400" height="400" id="scatterplot">
-                        </svg>
-                        <svg width="400" height="400" id="scatterplot-detail">
-                        </svg>
-                        <div class="tooltip bs-tooltip-top show" id="sc-tooltip" role="tooltip" style="display:none">
-                            <div class="tooltip-arrow"></div>
-                            <div class="tooltip-inner">
-                                stat
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 text-center">
-                    <svg width="400" height="400" id="pie-chart">
+                    <h5>전체 유저 분포</h5>
+                    <svg width="400" height="400" id="scatterplot">
                     </svg>
-                    <div class="tooltip bs-tooltip-top show" id="pie-tooltip" role="tooltip" style="display:none">
+                    <h5>이상치 제거 유저 분포</h5>
+                    <svg width="400" height="400" id="scatterplot-detail">
+                    </svg>
+                    <div class="tooltip bs-tooltip-top show" id="sc-tooltip" role="tooltip" style="display:none">
                         <div class="tooltip-arrow"></div>
                         <div class="tooltip-inner">
                             stat
                         </div>
                     </div>
-                    <div id="repo-stat" class="text-center">
-                        <div id="repo-info-1" class="d-flex flex-row">
-                            <div class="me-2"></div>
-                            <svg></svg>
-                        </div>
-                        <div id="repo-info-2" class="d-flex flex-row">
-                            <div class="me-2"></div>
-                            <svg></svg>
-                        </div>
-                        <div id="repo-info-3" class="d-flex flex-row">
-                            <div class="me-2"></div>
-                            <svg></svg>
-                        </div>
-                        <div id="repo-info-4" class="d-flex flex-row">
-                            <div class="me-2"></div>
-                            <svg></svg>
-                        </div>
-                        <div id="repo-info-5" class="d-flex flex-row">
-                            <div class="me-2"></div>
-                            <svg></svg>
-                        </div>
-                    </div>
                 </div>
-            </div>
-            
-            <div class="d-flex flex-column text-center">
+            <div class="d-flex flex-column align-items-center col-6 gap-2">
+                <h5>선택 유저 집단의 기여 Boxplot</h5>
                 <svg width="400" height="150" id="boxplot-commit_count">
                 </svg>
                 <svg width="400" height="150" id="boxplot-pr_count">
@@ -179,6 +191,8 @@
                 <svg width="400" height="150" id="boxplot-total_deletions">
                 </svg>
             </div>
+            </div>
+            
         </div>
     </body>
 </html>

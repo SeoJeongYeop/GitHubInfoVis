@@ -1,7 +1,11 @@
 function renderRepoCards(selector, d) {
 
   const repoContainer = document.querySelector(selector);
-  if (d === null) repoContainer.innerHTML = "";
+  if (d === null) {
+    repoContainer.innerHTML = "";
+    const num = document.querySelector(selector.replace("div", "span"));
+    num.style = "display:none";
+  }
   else {
     repoContainer.innerHTML =
       `<div class="card mb-2">
@@ -27,5 +31,7 @@ function renderRepoCards(selector, d) {
       </div>
     </div>
   </div>`;
+    const num = document.querySelector(selector.replace("div", "span"));
+    num.style = "display:inline";
   }
 }
