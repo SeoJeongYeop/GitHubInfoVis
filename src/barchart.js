@@ -28,6 +28,8 @@ class RepoBarchart {
   }
 
   update(data, xVars, username) {
+    this.svg.style("display", "block");
+
     const categories = [...new Set(xVars)]
     this.username = username;
     this.xScale.domain(categories).range([0, this.width]).padding(0.3);
@@ -49,5 +51,11 @@ class RepoBarchart {
     this.yAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
       .call(d3.axisLeft(this.yScale));
+  }
+
+  delete() {
+    console.log("delete");
+    this.container.selectAll("rect").remove();
+    this.svg.style("display", "none");
   }
 }

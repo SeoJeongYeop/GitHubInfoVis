@@ -143,7 +143,14 @@ function updateVisData() {
   // 2. repo chart
   pieChart.setData(repoData);
   updatePieChart();
-  renderRepoCards(repoData);
+  let repoBestData = repoData.slice(0, 5);
+  for (let i = 0; i < 5; i++) {
+    let obj = null;
+    if (repoBestData.length > i) obj = repoBestData[i];
+    renderRepoCards(`#repo-info-${i + 1} div`, obj);
+    updateBarChart(repoBarCharts[i], obj);
+  }
+
   // 3. scatter chart
   let scatterData = getScatterPlotData();
   console.log("userSumData", scatterData["userSumData"].length);
@@ -171,7 +178,10 @@ function updatePieChart() {
  */
 function updateBarChart(chart, repoObj) {
   console.log("[update] RepoBarChart");
-  chart.update(repoObj, ["total_additions", "total_deletions"], selectUsername);
+  if (repoObj === null)
+    chart.delete();
+  else
+    chart.update(repoObj, ["total_additions", "total_deletions"], selectUsername);
 }
 /**
  * 산점도 업데이트
@@ -228,7 +238,6 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     pieChart.initialize();
     let repoBestData = repoData.slice(0, 5);
     updatePieChart();
-
     repoBarCharts = repoBestData.map((obj, i) => {
       renderRepoCards(`#repo-info-${i + 1} div`, obj);
       repoBarChart = new RepoBarchart(`#repo-info-${i + 1} svg`);

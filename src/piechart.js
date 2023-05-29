@@ -6,9 +6,9 @@ class Piechart {
   preprocess() {
     this.data.forEach(d => d.contr = d.commit_count + d.issue_count + d.pr_count);
     this.data.sort((a, b) => b.contr - a.contr);
-    // 리포지토리가 많을 때 상위 6개 슬라이싱하고 나머지 합치기
-    if (this.data.length > 6) {
-      let etc = this.data.slice(6, this.data.length)
+    // 리포지토리가 많을 때 상위 5개 슬라이싱하고 나머지 합치기
+    if (this.data.length > 5) {
+      let etc = this.data.slice(5, this.data.length)
       let etcObj = JSON.parse(JSON.stringify(this.data[0]));
       etcObj.repo = `other ${etc.length} repo`, etcObj.commit_count = 0, etcObj.pr_count = 0, etcObj.issue_count = 0, etcObj.total_additions = 0, etcObj.total_deletions = 0;
       etc.forEach(obj => {
@@ -18,7 +18,7 @@ class Piechart {
         etcObj.total_additions += obj.total_additions;
         etcObj.total_deletions += obj.total_deletions;
       })
-      this.data = this.data.slice(0, 6);
+      this.data = this.data.slice(0, 5);
       this.data.push(etcObj);
     }
   }
@@ -61,7 +61,6 @@ class Piechart {
       .innerRadius(0)
       .outerRadius(this.radius);
     this.pieData = this.pie(this.data);
-    console.log(this.pieData)
 
     this.container.selectAll("path")
       .data(this.pieData)

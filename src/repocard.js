@@ -1,7 +1,10 @@
 function renderRepoCards(selector, d) {
+
   const repoContainer = document.querySelector(selector);
-  repoContainer.innerHTML +=
-    `<div class="card mb-2">
+  if (d === null) repoContainer.innerHTML = "";
+  else {
+    repoContainer.innerHTML =
+      `<div class="card mb-2">
     <div class="card-body overflow-hidden">
       <div class="card-title repo-header">
         <div class="fw-bold">
@@ -24,4 +27,5 @@ function renderRepoCards(selector, d) {
       </div>
     </div>
   </div>`;
+  }
 }

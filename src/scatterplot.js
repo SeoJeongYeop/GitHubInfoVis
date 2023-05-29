@@ -3,7 +3,7 @@ class Scatterplot {
     top: 10, right: 100, bottom: 40, left: 40
   }
 
-  constructor(svg, tooltip, data, width = 250, height = 250) {
+  constructor(svg, tooltip, data, width = 300, height = 300) {
     this.svg = svg;
     this.tooltip = tooltip;
     this.data = data;
