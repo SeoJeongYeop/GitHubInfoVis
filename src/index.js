@@ -18,6 +18,7 @@ function updateYearData(val) {
   }
   console.log("data", data.length, "val", val);
   let userData = data.filter(obj => obj.username === selectUsername);
+  userData = getUserDateSum(userData);
   let dateRange = [...new Set(userData.map(d => d.date))].sort();
   setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
   startDate = dateRange[0];
@@ -30,8 +31,33 @@ function updateYearData(val) {
 
   updateVisData();
 }
+function getUserDateSum(userData) {
+  const dateSumObj = {};
+  userData.forEach((d) => {
+    if (!dateSumObj[d.date]) {
+      dateSumObj[d.date] = {
+        username: d.username,
+        commit_count: 0,
+        issue_count: 0,
+        pr_count: 0,
+        total_additions: 0,
+        total_deletions: 0,
+        date: d.date
+      };
+    }
+    dateSumObj[d.date].commit_count += d.commit_count;
+    dateSumObj[d.date].issue_count += d.issue_count;
+    dateSumObj[d.date].pr_count += d.pr_count;
+    dateSumObj[d.date].total_additions += d.total_additions;
+    dateSumObj[d.date].total_deletions += d.total_deletions;
+  });
+  return [...Object.values(dateSumObj)];
+}
 function fillZeroUserPeriodData(start, end, userData) {
-  userData.sort((a, b) => a.date - b.date);
+  userData.sort((a, b) => {
+    if (a.date < b.date) return -1;
+    else return 1;
+  });
   const startDate = new Date(start);
   const endDate = new Date(end);
   const currentDate = new Date(startDate);
@@ -41,7 +67,7 @@ function fillZeroUserPeriodData(start, end, userData) {
     cnt += 1;
     let cur = currentDate.toISOString().split('T')[0];
     if (cur === userData[offset].date) {
-      currentDate.setDate(currentDate.getDate() + 15);
+      currentDate.setDate(currentDate.getDate() + 1);
       offset += 1;
     }
     else {
@@ -49,10 +75,10 @@ function fillZeroUserPeriodData(start, end, userData) {
       temp.repo_name = "", temp.date = cur;
       temp.commit_count = 0, temp.issue_count = 0, temp.pr_count = 0, temp.total_additions = 0, temp.total_deletions = 0;
       userData.push(temp);
-      currentDate.setDate(currentDate.getDate() + 15);
+      currentDate.setDate(currentDate.getDate() + 1);
     }
   }
-  console.log("fillZeroUserPeriodData", cnt, userData.length);
+  console.log("fillZeroUserPeriodData", cnt, offset, userData.length);
   return userData;
 }
 function getUserPeriodData() {
@@ -65,9 +91,10 @@ function getUserPeriodData() {
       && obj.date <= end)
   });
   if (userData.length === 0) {
-    alert("해당 연도에 유저의 기여내역이 없습니다.");
+    alert("해당 기간에 유저의 기여내역이 없습니다.");
     return;
   }
+  userData = getUserDateSum(userData);
   userData = fillZeroUserPeriodData(start, end, userData)
   return userData;
 }
@@ -92,7 +119,7 @@ function updateVisData() {
  */
 function updateLineChart() {
   console.log("[update] LineChart");
-  lineChart.update("date", "commit_count", selectUsername);
+  lineChart.update("date", ["commit_count", "issue_count", "pr_count"], selectUsername);
 }
 /**
  * 산점도 업데이트
@@ -134,8 +161,8 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     startDate = dateRange[0];
     let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
     console.log("intvDate", intvDate);
-
-
+    userData = getUserDateSum(userData);
+    userData = fillZeroUserPeriodData(dateRange[0], dateRange[dateRange.length - 1], userData)
     setDateRangeSlider(intvDate);
 
     // d3 visualization
@@ -364,7 +391,7 @@ function getScatterPlotData() {
   let additionUpperBoundary = additionQuartiles.q3 + MUL * additionQuartiles.iqr
   deletionQuartiles = calculateQuartiles(userSumData, "total_deletions");
   let deletionUpperBoundary = deletionQuartiles.q3 + MUL * deletionQuartiles.iqr
-  console.log(commitUpperBoundary, issueQuartiles, prQuartiles);
+  // console.log(commitUpperBoundary, issueQuartiles, prQuartiles);
   const innerRangeData = userSumData.filter((d) => {
     // 이상치 제거
     return (

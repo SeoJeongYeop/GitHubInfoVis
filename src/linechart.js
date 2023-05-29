@@ -1,10 +1,10 @@
 class Linechart {
   margin = {
-    top: 10, right: 100, bottom: 40, left: 40
+    top: 40, right: 100, bottom: 40, left: 40
   }
   parseTime = d3.timeParse("%Y-%m-%d");
 
-  constructor(svg, data, width = 400, height = 300) {
+  constructor(svg, data, width = 450, height = 300) {
     this.svg = svg;
     this.data = data;
     this.width = width;
@@ -28,18 +28,30 @@ class Linechart {
     this.legend = this.svg.append('g');
     this.xScale = d3.scaleTime();
     this.yScale = d3.scaleLinear();
+    this.zScale = d3.scaleOrdinal().range(d3.schemeCategory10)
     this.svg
       .attr('width', this.width + this.margin.left + this.margin.right)
       .attr('height', this.height + this.margin.top + this.margin.bottom);
 
     this.container.attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
   }
-
-  update(xVar, yVar, username) {
+  update(xVar, yVars, username) {
+    if (typeof yVars === "string")
+      yVars = [yVars];
     console.log("update linechart", this.data.length)
     this.username = username;
     this.xScale.domain(d3.extent(this.data, d => d[xVar])).range([0, this.width]);
-    this.yScale.domain(d3.extent(this.data, d => d[yVar])).range([this.height, 0]);
+    this.yScales = (d) => {
+      let maxVar = 0;
+      yVars.forEach((v) => {
+        if (d[v] > maxVar) {
+          maxVar = d[v];
+        }
+      });
+      return maxVar;
+    };
+    this.yScale.domain(d3.extent(this.data, d => this.yScales(d))).range([this.height, 0]);
+    this.zScale.domain(yVars);
 
     // X축 생성
     this.xAxis
@@ -55,17 +67,26 @@ class Linechart {
       .transition()
       .call(d3.axisLeft(this.yScale).tickFormat(d3.format(".2s")));
 
-    // 라인 생성
-    this.line = d3.line()
-      .x(d => this.xScale(d[xVar]))
-      .y(d => this.yScale(d[yVar]));
-
-    this.container.selectAll("path")
-      .data([this.data])
-      .join("path")
-      .attr("class", "line")
-      .attr("d", this.line)
-      .style("fill", "none")
-      .style("stroke", "blue");
+    // yVar에 따라 달라지는 line 함수
+    this.lines = (v) => {
+      return d3.line()
+        .x(d => this.xScale(d[xVar]))
+        .y(d => this.yScale(d[v]));
+    }
+    // 라인 삭제 후 다시 추가
+    this.container.selectAll("path").remove();
+    yVars.forEach(v => {
+      this.container.append("path")
+        .datum(this.data)
+        .attr("d", this.lines(v))
+        .attr("fill", "none")
+        .attr("stroke", this.zScale(v));
+    });
+    // legend 추가
+    this.legend
+      .style("display", "inline")
+      .style("font-size", ".6em")
+      .attr("transform", `translate(${this.width + this.margin.left + 10}, ${this.height / 4})`)
+      .call(d3.legendColor().scale(this.zScale));
   }
 }
