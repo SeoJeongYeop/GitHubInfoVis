@@ -75,3 +75,8 @@
   background-color: #9D9D9D;
 }
 /*End RangeSlider*/
+
+.card {
+  width:250px;
+  height: 150px;
+}

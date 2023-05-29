@@ -193,6 +193,13 @@ function updateScatterPlot() {
   scatterPlot.update(xVar, yVar, selectUsername);
   scatterPlotDetail.update(xVar, yVar, selectUsername);
 }
+/**
+ * 박스플롯 업데이트
+ */
+function updateBoxPlot(chart, key) {
+  console.log("[update] BoxPlot");
+  chart.update(key, selectUsername);
+}
 
 let parseDate = (dateStr) => Date.parse(dateStr);
 let formatYear = (date) => date.slice(0, 4);
@@ -257,6 +264,16 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     d3.selectAll("input[type=radio][name=y-encoding]").on("change", updateScatterPlot);
     d3.selectAll("#use-color").on("change", updateScatterPlot);
     d3.selectAll(".range-input input").on("change", updateVisData);
+
+    //4. Box plot
+    boxPlots = []
+    let keys = ["commit_count", "pr_count", "issue_count", "total_additions", "total_deletions"];
+    keys.forEach(key => {
+      let boxPlot = new Boxplot(`#boxplot-${key}`, scatterData["userSumData"]);
+      boxPlot.initialize();
+      updateBoxPlot(boxPlot, key);
+      boxPlots.push(boxPlot);
+    });
   });
 
 function setDateInputs(minDate, maxDate) {
@@ -478,6 +495,5 @@ function getScatterPlotData() {
       d.total_deletions <= deletionUpperBoundary
     );
   });
-
   return { "userSumData": userSumData, "innerRangeData": innerRangeData }
 }

@@ -1,6 +1,6 @@
 class RepoBarchart {
   margin = {
-    top: 10, right: 10, bottom: 40, left: 40
+    top: 10, right: 10, bottom: 20, left: 40
   }
 
   constructor(svg, width = 250, height = 120) {
