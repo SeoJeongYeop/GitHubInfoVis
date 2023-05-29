@@ -1,23 +1,29 @@
 class Linechart {
   margin = {
-    top: 40, right: 100, bottom: 40, left: 40
+    top: 40, right: 120, bottom: 40, left: 40
   }
   parseTime = d3.timeParse("%Y-%m-%d");
 
-  constructor(svg, data, width = 450, height = 300) {
+  constructor(svg, data, width = 420, height = 300) {
     this.svg = svg;
     this.data = data;
     this.width = width;
     this.height = height;
     this.handlers = {};
     this.data.forEach(d => d.date = this.parseTime(d.date));
-    this.data.sort((a, b) => a.date - b.date);
+    this.data.sort((a, b) => {
+      if (a.date < b.date) return -1;
+      else return 1;
+    });
   }
 
   setData(data) {
     this.data = data;
     this.data.forEach(d => d.date = this.parseTime(d.date));
-    this.data.sort((a, b) => a.date - b.date);
+    this.data.sort((a, b) => {
+      if (a.date < b.date) return -1;
+      else return 1;
+    });
   }
 
   initialize() {

@@ -1,7 +1,8 @@
 /*RangeSlider*/
 /*source: mdaquibanwer/price-range-slider-with-min-max-input-price*/
 .wrapper{
-  width: 500px;
+  width: 450px;
+  margin-left: 1.5rem;
 }
 .field{
   display: flex;
@@ -15,12 +16,6 @@
   text-align: center;
   border-radius: 1rem;
   border: 1px solid #9D9D9D;
-  appearance: none;
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button
-{
   appearance: none;
 }
 
