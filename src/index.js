@@ -1,4 +1,4 @@
-let totalData, data, sliderData, brushedData, lineChart, pieChart, repoCard, repoBarChart, scatterPlot, scatterPlotDetail, boxPlot;
+let totalData, data, sliderData, brushedData, lineChart, pieChart, repoCard, repoBarCharts, scatterPlot, scatterPlotDetail, boxPlot;
 let selectUsername, startDate;
 
 function updateYearData(val) {
@@ -143,7 +143,7 @@ function updateVisData() {
   // 2. repo chart
   pieChart.setData(repoData);
   updatePieChart();
-  // renderRepoCards(repoData);
+  renderRepoCards(repoData);
   // 3. scatter chart
   let scatterData = getScatterPlotData();
   console.log("userSumData", scatterData["userSumData"].length);
@@ -165,6 +165,13 @@ function updateLineChart() {
 function updatePieChart() {
   console.log("[update] PieChart");
   pieChart.update("repo", "contr", selectUsername);
+}
+/**
+ * Repo bar 차트 업데이트
+ */
+function updateBarChart(chart, repoObj) {
+  console.log("[update] RepoBarChart");
+  chart.update(repoObj, ["total_additions", "total_deletions"], selectUsername);
 }
 /**
  * 산점도 업데이트
@@ -219,7 +226,17 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     // 2. Repo Chart
     pieChart = new Piechart("#pie-chart", "#pie-tooltip", repoData);
     pieChart.initialize();
+    let repoBestData = repoData.slice(0, 5);
     updatePieChart();
+
+    repoBarCharts = repoBestData.map((obj, i) => {
+      renderRepoCards(`#repo-info-${i + 1} div`, obj);
+      repoBarChart = new RepoBarchart(`#repo-info-${i + 1} svg`);
+      repoBarChart.initialize();
+      updateBarChart(repoBarChart, obj);
+      return repoBarChart;
+    });
+
     // 3. Scatter plot
     let scatterData = getScatterPlotData();
     scatterPlot = new Scatterplot("#scatterplot", "#sc-tooltip", scatterData["userSumData"]);
