@@ -35,8 +35,10 @@
         <script src="src/index.js"></script>
     </head>
     <body>
+        <header class="text-center p-2">
+            <h2><a href="/">GitHub Activity Visualization</a></h2>
+        </header>
         <div class="container">
-            <h1>GitHub Activity Visualization</h1>
             <div class="row d-flex flex-row my-5">
                 <div class="col-2 dropdown">
                     <button id="btn-drop-year" type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -165,10 +167,10 @@
                             <label class="form-check-label" for="y-deletions">Deletions</label>
                         </div>
                     </div>
-                    <h5>전체 유저 분포</h5>
+                    <h6>전체 유저 분포</h6>
                     <svg width="400" height="400" id="scatterplot">
                     </svg>
-                    <h5>이상치 제거 유저 분포</h5>
+                    <h6>이상치 제거 유저 분포</h6>
                     <svg width="400" height="400" id="scatterplot-detail">
                     </svg>
                     <div class="tooltip bs-tooltip-top show" id="sc-tooltip" role="tooltip" style="display:none">

@@ -116,3 +116,11 @@
 #repo-stat::-webkit-scrollbar-thumb:hover {
   background: #9D9D9D;
 }
+
+header{
+  background-color: #DAE2E8;
+  margin:auto;
+}
+h2 > a{
+  text-decoration: none;
+}
