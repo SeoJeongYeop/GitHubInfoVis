@@ -18,6 +18,7 @@ function updateYearData(val) {
   }
   console.log("data", data.length, "val", val);
   let userData = data.filter(obj => obj.username === selectUsername);
+  let repoData = getUserRepoSum(userData);
   userData = getUserDateSum(userData);
   let dateRange = [...new Set(userData.map(d => d.date))].sort();
   setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
@@ -53,6 +54,35 @@ function getUserDateSum(userData) {
   });
   return [...Object.values(dateSumObj)];
 }
+function getUserRepoSum(userData) {
+  const repoSumObj = {};
+
+  userData.forEach((d) => {
+    let repo = `${d.repo_owner}/${d.repo_name}`;
+
+    if (!repoSumObj[repo]) {
+      repoSumObj[repo] = {
+        username: d.username,
+        repo_owner: d.repo_owner,
+        repo_name: d.repo_name,
+        repo: `${d.repo_owner}/${d.repo_name}`,
+        commit_count: 0,
+        issue_count: 0,
+        pr_count: 0,
+        total_additions: 0,
+        total_deletions: 0,
+        contr: 0
+      };
+    }
+    repoSumObj[repo].commit_count += d.commit_count;
+    repoSumObj[repo].issue_count += d.issue_count;
+    repoSumObj[repo].pr_count += d.pr_count;
+    repoSumObj[repo].total_additions += d.total_additions;
+    repoSumObj[repo].total_deletions += d.total_deletions;
+  });
+  return [...Object.values(repoSumObj)];
+}
+
 function fillZeroUserPeriodData(start, end, userData) {
   userData.sort((a, b) => {
     if (a.date < b.date) return -1;
@@ -94,24 +124,32 @@ function getUserPeriodData() {
     alert("해당 기간에 유저의 기여내역이 없습니다.");
     return;
   }
+  let repoData = getUserRepoSum(userData);
   userData = getUserDateSum(userData);
   userData = fillZeroUserPeriodData(start, end, userData)
-  return userData;
+  return { "user": userData, "repo": repoData };
 }
 /**
  * 연도 변경시 모든 데이터 범위를 조정하고 차트 업데이트
  */
 function updateVisData() {
-  userData = getUserPeriodData();
+  let userPeriodData = getUserPeriodData();
+  let userData = userPeriodData['user'];
+  let repoData = userPeriodData['repo'];
+
+  // 1. line chart
   lineChart.setData(userData);
   updateLineChart();
+  // 2. repo chart
+  pieChart.setData(repoData);
+  updatePieChart();
+  // renderRepoCards(repoData);
+  // 3. scatter chart
   let scatterData = getScatterPlotData();
   console.log("userSumData", scatterData["userSumData"].length);
   console.log("innerRangeData", scatterData["innerRangeData"].length);
-
   scatterPlot.setData(scatterData["userSumData"]);
   scatterPlotDetail.setData(scatterData["innerRangeData"]);
-
   updateScatterPlot();
 }
 /**
@@ -120,6 +158,13 @@ function updateVisData() {
 function updateLineChart() {
   console.log("[update] LineChart");
   lineChart.update("date", ["commit_count", "issue_count", "pr_count"], selectUsername);
+}
+/**
+ * 파이차트 업데이트
+ */
+function updatePieChart() {
+  console.log("[update] PieChart");
+  pieChart.update("repo", "contr", selectUsername);
 }
 /**
  * 산점도 업데이트
@@ -160,7 +205,8 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
     startDate = dateRange[0];
     let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
-    console.log("intvDate", intvDate);
+    console.log("intvDate", intvDate, userData[0]);
+    let repoData = getUserRepoSum(userData);
     userData = getUserDateSum(userData);
     userData = fillZeroUserPeriodData(dateRange[0], dateRange[dateRange.length - 1], userData)
     setDateRangeSlider(intvDate);
@@ -170,6 +216,10 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     lineChart = new Linechart("#line-chart", userData);
     lineChart.initialize();
     updateLineChart();
+    // 2. Repo Chart
+    pieChart = new Piechart("#pie-chart", repoData);
+    pieChart.initialize();
+    updatePieChart();
     // 3. Scatter plot
     let scatterData = getScatterPlotData();
     scatterPlot = new Scatterplot("#scatterplot", "#sc-tooltip", scatterData["userSumData"]);
