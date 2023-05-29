@@ -4,7 +4,7 @@ class Linechart {
   }
   parseTime = d3.timeParse("%Y-%m-%d");
 
-  constructor(svg, data, width = 440, height = 400) {
+  constructor(svg, data, width = 420, height = 400) {
     this.svg = svg;
     this.data = data;
     this.width = width;

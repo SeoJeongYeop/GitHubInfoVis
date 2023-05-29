@@ -1,6 +1,6 @@
 let totalData, data, sliderData, brushedData, lineChart, pieChart, repoCard, repoBarCharts, scatterPlot, scatterPlotDetail, boxPlot;
-let selectUsername, startDate;
-
+let selectUsername = "zypnwnqd", startDate;
+// selectUsername의 초기설정은 로그인 사용자로 가정
 function updateYearData(val) {
   console.log("updateYearData", val);
   console.log("data before", data.length);
@@ -219,8 +219,6 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     let yearRange = [...new Set(data.map(d => formatYear(d.date)))].sort();
     let usernameRange = [...new Set(data.map(d => d.username))].sort();
 
-    selectUsername = "zypnwnqd";
-
     // 보조도구 설정
     setYearDropdown(yearRange.reverse());
     setUserSelect(usernameRange);
@@ -341,8 +339,8 @@ function setYear(val) {
   if (yearDropdown.innerText !== String(val)) {
     console.log("setYear");
     yearDropdown.innerText = val;
-    updateYearData(val);
   }
+  updateYearData(val);
 }
 
 function getDayToDate(day) {
@@ -429,15 +427,20 @@ function setDateRangeSlider(intvDate) {
 function setUserSelect(usernameRange) {
   let userSelect = document.getElementById("user-select");
   usernameRange.forEach((username) => {
-    userSelect.innerHTML += `<option value="${username}">${username}</option>`;
+    if (selectUsername === username)
+      userSelect.innerHTML += `<option value="${username}" selected>${username}</option>`;
+    else userSelect.innerHTML += `<option value="${username}">${username}</option>`;
   });
 
   new SlimSelect({
     select: "#user-select",
     events: {
       afterChange: (newVal) => {
-        console.log(newVal)
-        selectUsername = newVal;
+        console.log("newVal", newVal)
+        selectUsername = newVal[0].value;
+        let yearBtn = document.getElementById("btn-drop-year");
+        console.log(yearBtn.innerText, selectUsername);
+        setYear(yearBtn.innerText);
       }
     }
   })

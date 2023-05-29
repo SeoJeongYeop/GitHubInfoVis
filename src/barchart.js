@@ -3,7 +3,7 @@ class RepoBarchart {
     top: 10, right: 10, bottom: 20, left: 40
   }
 
-  constructor(svg, width = 260, height = 120) {
+  constructor(svg, width = 200, height = 120) {
     this.svg = svg;
     this.width = width;
     this.height = height;
