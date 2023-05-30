@@ -141,7 +141,7 @@ class Boxplot {
       .attr("cy", d => this.yScale(1))
       .attr("fill", "black")
       .attr("opacity", 0.5)
-      .attr("r", 3);
+      .attr("r", 4);
 
     this.xAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)

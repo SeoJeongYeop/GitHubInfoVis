@@ -46,7 +46,7 @@ class Scatterplot {
     this.username = username;
     this.xScale.domain(d3.extent(this.data, d => d[xVar])).range([0, this.width]);
     this.yScale.domain(d3.extent(this.data, d => d[yVar])).range([this.height, 0]);
-    this.zScale.domain([...new Set(this.data.map(d => d.username === this.username))])
+    this.zScale.domain([...new Set(this.data.map(d => d.username === this.username))]);
 
     this.container.call(this.brush);
     this.circles = this.container.selectAll("circle")
@@ -79,9 +79,16 @@ class Scatterplot {
       .transition()
       .attr("cx", d => this.xScale(d[xVar]))
       .attr("cy", d => this.yScale(d[yVar]))
-      .attr("fill", this.zScale(d => d.username === this.username))
-      .attr("r", 3)
-      .attr("opacity", 0.5)
+      .attr("fill", d => this.zScale(d.username === this.username))
+      .attr("r", 4)
+      .attr("opacity", d => {
+        if (d.username === this.username) return 1;
+        else return 0.5;
+      });
+    // 유저의 원을 raise로 맨 앞으로 이동
+    this.circles
+      .filter(d => d.username === this.username)
+      .raise();
 
     this.xAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)

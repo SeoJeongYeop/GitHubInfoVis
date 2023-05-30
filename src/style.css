@@ -124,3 +124,9 @@ header{
 h2 > a{
   text-decoration: none;
 }
+
+.brushed {
+  stroke-width: 1;
+  stroke: gray;
+  r: 5;
+}
