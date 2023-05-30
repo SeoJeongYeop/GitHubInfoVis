@@ -1,37 +1,33 @@
 let totalData, data, sliderData, brushedData, lineChart, pieChart, repoCard, repoBarCharts, scatterPlot, scatterPlotDetail, boxPlot;
 let selectUsername = "zypnwnqd", startDate;
 // selectUsername의 초기설정은 로그인 사용자로 가정
+let regexUsername = name => new RegExp(name);
 function updateYearData(val) {
-  console.log("updateYearData", val);
-  console.log("data before", data.length);
-
   if (val === "ALL")
     data = JSON.parse(JSON.stringify(totalData));
   else {
     data = JSON.parse(JSON.stringify(totalData));
-    console.log("else", data[0].date, typeof (data[0].date));
     data = data.filter(d => formatYear(d.date) === String(val));
   }
+
   if (data.length === 0) {
     alert("해당 연도에는 데이터가 없습니다.");
     return;
   }
-  console.log("data", data.length, "val", val);
-  let userData = data.filter(obj => obj.username === selectUsername);
-  let repoData = getUserRepoSum(userData);
+
+  let userData = data.filter(obj => regexUsername(selectUsername).test(obj.username));
   userData = getUserDateSum(userData);
   let dateRange = [...new Set(userData.map(d => d.date))].sort();
   setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
   startDate = dateRange[0];
   let intvDate = getDateDiff(dateRange[0], dateRange[dateRange.length - 1])
-  console.log("intvDate", intvDate);
   const progress = document.getElementsByClassName("progress")[0];
   progress.style.left = "0%";
   progress.style.right = "0%";
   setDateRangeSlider(intvDate);
-
   updateVisData();
 }
+
 function getUserDateSum(userData) {
   const dateSumObj = {};
   userData.forEach((d) => {
@@ -54,9 +50,12 @@ function getUserDateSum(userData) {
   });
   return [...Object.values(dateSumObj)];
 }
+
+/**
+ * Repo를 기준으로 데이터 합산
+ */
 function getUserRepoSum(userData) {
   const repoSumObj = {};
-
   userData.forEach((d) => {
     let repo = `${d.repo_owner}/${d.repo_name}`;
 
@@ -83,6 +82,10 @@ function getUserRepoSum(userData) {
   return [...Object.values(repoSumObj)];
 }
 
+/**
+ * 기간 데이터가 없어서 line chart가 왜곡되는 현상
+ * -> 기간 데이터가 없으면 0으로 설정한 데이터를 추가
+ */
 function fillZeroUserPeriodData(start, end, userData) {
   userData.sort((a, b) => {
     if (a.date < b.date) return -1;
@@ -108,15 +111,18 @@ function fillZeroUserPeriodData(start, end, userData) {
       currentDate.setDate(currentDate.getDate() + 1);
     }
   }
-  console.log("fillZeroUserPeriodData", cnt, offset, userData.length);
   return userData;
 }
+
+/**
+ * 설정한 기간으로 User 데이터 조절
+ */
 function getUserPeriodData() {
   data = JSON.parse(JSON.stringify(totalData));
   let start = document.getElementById("input-start").value;
   let end = document.getElementById("input-end").value;
   let userData = data.filter(obj => {
-    return (obj.username === selectUsername
+    return (regexUsername(selectUsername).test(obj.username)
       && obj.date >= start
       && obj.date <= end)
   });
@@ -129,6 +135,7 @@ function getUserPeriodData() {
   userData = fillZeroUserPeriodData(start, end, userData)
   return { "user": userData, "repo": repoData };
 }
+
 /**
  * 연도 변경시 모든 데이터 범위를 조정하고 차트 업데이트
  */
@@ -153,8 +160,6 @@ function updateVisData() {
 
   // 3. scatter chart
   let scatterData = getScatterPlotData();
-  console.log("userSumData", scatterData["userSumData"].length);
-  console.log("innerRangeData", scatterData["innerRangeData"].length);
   scatterPlot.setData(scatterData["userSumData"]);
   scatterPlotDetail.setData(scatterData["innerRangeData"]);
   updateScatterPlot();
@@ -222,7 +227,7 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     // 보조도구 설정
     setYearDropdown(yearRange.reverse());
     setUserSelect(usernameRange);
-    let userData = data.filter(obj => obj.username === selectUsername);
+    let userData = data.filter(obj => regexUsername(selectUsername).test(obj.username));
     let dateRange = [...new Set(userData.map(d => d.date))].sort();
     setDateInputs(dateRange[0], dateRange[dateRange.length - 1]);
     startDate = dateRange[0];
@@ -297,8 +302,12 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     });
   });
 
+/**
+ * Start Date와 End Date 설정
+ * @param {String} minDate YYYY-mm-dd
+ * @param {String} maxDate YYYY-mm-dd
+ */
 function setDateInputs(minDate, maxDate) {
-  console.log("minDate", minDate, "maxDate", maxDate)
   let inputStart = document.getElementById("input-start");
   let inputEnd = document.getElementById("input-end");
   inputStart.value = minDate;
@@ -320,6 +329,11 @@ function setDateInputs(minDate, maxDate) {
   });
 }
 
+/**
+ * Start Date와 End Date 의 기간 차이 계산
+ * @param {String} start YYYY-mm-dd
+ * @param {String} end YYYY-mm-dd
+ */
 function getDateDiff(start, end) {
   let s = new Date(start);
   let e = new Date(end);
@@ -328,6 +342,10 @@ function getDateDiff(start, end) {
   return dayDiff;
 }
 
+/**
+ * 연도 드롭다운 설정
+ * @param {Array} yearRange [2023, 2022, ...]
+ */
 function setYearDropdown(yearRange) {
   let yearItem = document.getElementById("li-year");
   yearRange.forEach(year => {
@@ -336,13 +354,15 @@ function setYearDropdown(yearRange) {
 }
 function setYear(val) {
   let yearDropdown = document.getElementById("btn-drop-year");
-  if (yearDropdown.innerText !== String(val)) {
-    console.log("setYear");
+  if (yearDropdown.innerText !== String(val))
     yearDropdown.innerText = val;
-  }
   updateYearData(val);
 }
 
+/**
+ * start Date로부터 day만큼 떨어진 날짜 문자열 구하기
+ * @param {Integer} day
+ */
 function getDayToDate(day) {
   let startDateStamp = new Date(startDate);
   let target = new Date(startDateStamp.getTime() + day * 24 * 60 * 60 * 1000);
@@ -351,6 +371,11 @@ function getDayToDate(day) {
   let dd = String(target.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 }
+
+/**
+ * Range Slider를 설정
+ * @param {Integer} intvDate
+ */
 function setDateRangeSlider(intvDate) {
   // source: mdaquibanwer/price-range-slider-with-min-max-input-price
   const rangeInputs = document.querySelectorAll(".range-input input");
@@ -424,8 +449,13 @@ function setDateRangeSlider(intvDate) {
   })
 }
 
+/**
+ * Slim Select를 이용한 유저 선택 기능
+ * @param {Array} usernameRange
+ */
 function setUserSelect(usernameRange) {
   let userSelect = document.getElementById("user-select");
+  userSelect.innerHTML += `<option value=".*">ADMIN</option>`;
   usernameRange.forEach((username) => {
     if (selectUsername === username)
       userSelect.innerHTML += `<option value="${username}" selected>${username}</option>`;
@@ -436,16 +466,18 @@ function setUserSelect(usernameRange) {
     select: "#user-select",
     events: {
       afterChange: (newVal) => {
-        console.log("newVal", newVal)
         selectUsername = newVal[0].value;
         let yearBtn = document.getElementById("btn-drop-year");
-        console.log(yearBtn.innerText, selectUsername);
         setYear(yearBtn.innerText);
       }
     }
   })
 }
 
+/**
+ * Scatter detail을 위해 사분위수 관련 수 구하는 함수
+ * @param {Integer} intvDate
+ */
 function calculateQuartiles(data, key) {
   dist = []
   // split data array
@@ -454,7 +486,6 @@ function calculateQuartiles(data, key) {
   });
   // sort data array
   dist.sort();
-  // console.log("dist", dist)
 
   // 데이터를 오름차순으로 정렬
   const sortedData = dist.sort((a, b) => a - b);
@@ -474,6 +505,9 @@ function calculateQuartiles(data, key) {
   return { q1, q3, iqr };
 }
 
+/**
+ * scatterplot과 boxplot을 위한 데이터 전처리 함수
+ */
 function getScatterPlotData() {
   let start = document.getElementById("input-start").value;
   let end = document.getElementById("input-end").value;
@@ -510,7 +544,7 @@ function getScatterPlotData() {
   let additionUpperBoundary = additionQuartiles.q3 + MUL * additionQuartiles.iqr
   deletionQuartiles = calculateQuartiles(userSumData, "total_deletions");
   let deletionUpperBoundary = deletionQuartiles.q3 + MUL * deletionQuartiles.iqr
-  // console.log(commitUpperBoundary, issueQuartiles, prQuartiles);
+
   const innerRangeData = userSumData.filter((d) => {
     // 이상치 제거
     return (

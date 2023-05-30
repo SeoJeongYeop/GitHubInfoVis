@@ -55,7 +55,6 @@ class RepoBarchart {
   }
 
   delete() {
-    console.log("delete");
     this.container.selectAll("rect").remove();
     this.svg.style("display", "none");
   }
