@@ -266,6 +266,8 @@ d3.csv("https://raw.githubusercontent.com/SeoJeongYeop/GitHubInfoVis/main/github
     d3.selectAll("input[type=radio][name=y-encoding]").on("change", updateScatterPlot);
     d3.selectAll("#use-color").on("change", updateScatterPlot);
     d3.selectAll(".range-input input").on("change", updateVisData);
+    d3.selectAll("#input-start").on("change", updateVisData);
+    d3.selectAll("#input-end").on("change", updateVisData);
 
     scatterPlot.on("brush", (brushedItems) => {
       if (brushedItems.length !== 0)
