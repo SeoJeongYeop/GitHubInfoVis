@@ -44,9 +44,10 @@ class Linechart {
   update(xVar, yVars, username) {
     if (typeof yVars === "string")
       yVars = [yVars];
-    console.log("update linechart", this.data.length)
     this.username = username;
-    this.xScale.domain(d3.extent(this.data, d => d[xVar])).range([0, this.width]);
+    this.xScale
+      .domain(d3.extent(this.data, d => d[xVar]))
+      .range([0, this.width]);
     this.yScales = (d) => {
       let maxVar = 0;
       yVars.forEach((v) => {
@@ -56,13 +57,13 @@ class Linechart {
       });
       return maxVar;
     };
-    this.yScale.domain(d3.extent(this.data, d => this.yScales(d))).range([this.height, 0]);
+    this.yScale.domain([0, d3.max(this.data, d => this.yScales(d))]).range([this.height, 0]);
     this.zScale.domain(yVars);
 
     // X축 생성
     this.xAxis
       .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
-      .style("font-size", "0.7rem")
+      .style("font-size", "0.55rem")
       .transition()
       .call(d3.axisBottom(this.xScale));
 
