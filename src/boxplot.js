@@ -1,9 +1,9 @@
 class Boxplot {
   margin = {
-    top: 10, right: 40, bottom: 20, left: 40
+    top: 20, right: 40, bottom: 20, left: 40
   }
 
-  constructor(svg, data, width = 450, height = 150) {
+  constructor(svg, data, width = 450, height = 95) {
     this.svg = svg;
     this.data = data;
     this.width = width;
@@ -142,6 +142,10 @@ class Boxplot {
       .attr("fill", "black")
       .attr("opacity", 0.5)
       .attr("r", 3);
+
+    this.xAxis
+      .attr("transform", `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+      .call(d3.axisBottom(this.xScale).tickFormat(d3.format(".2s")));
   }
 
   calculateQuartiles(data, key) {
